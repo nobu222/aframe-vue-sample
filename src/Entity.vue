@@ -1,8 +1,5 @@
 <template>
-  <a-entity ref="entity"
-            geometry="primitive: plane; height: 1; width: 1;"
-            material="shader: flat;"
-  ></a-entity>
+  <a-entity ref="entity"></a-entity>
 </template>
 
 <script>

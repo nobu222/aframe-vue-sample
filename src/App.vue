@@ -2,7 +2,7 @@
   <div id="app">
     <a-scene>
       <a-assets>
-        <!--<audio id="click-sound" src="audio/click.ogg"></audio>-->
+        <audio id="click-sound" src="audio/click.ogg"></audio>
         <!-- Images. -->
         <img id="city" src="https://cdn.aframe.io/360-image-gallery-boilerplate/img/city.jpg">
         <img id="city-thumb" src="https://cdn.aframe.io/360-image-gallery-boilerplate/img/thumb-city.jpg">
@@ -12,18 +12,18 @@
         <img id="sechelt-thumb" src="https://cdn.aframe.io/360-image-gallery-boilerplate/img/thumb-sechelt.jpg">
       </a-assets>
       <!-- 360-degree image. -->
-      <a-sky id="image-360" radius="10" ref="sky"
-             :src="`#${sky}`"
-             v-animation="fade"></a-sky>
-
+      <a-sky ref="sky"
+             id="image-360"
+             radius="10"
+             v-animation="fade"
+             :src="`#${sky}`"></a-sky>
       <!-- Link we will build. -->
-      <template v-for="(thumb, i) in thumbs">
-        <entity @click.native="change(thumb)"
-        v-animation="hover"
-        :geometry="geometry"
-        :material="{shader: 'flat', src: `#${thumb}`}"
-        :position="{x:i*2, y: 0, z: -4}"></entity>
-      </template>
+      <entity v-for="(thumb,i) in thumbs"
+              @click.native="change(thumb)"
+              v-animation="hover"
+              :geometry="geometry"
+              :material="{shader: 'flat', src: `#${thumb}`}"
+              :position="{x:i*2, y: 0, z: -4}"></entity>
       <!-- Camera + Cursor. -->
       <a-camera>
         <a-cursor id="cursor">
@@ -67,6 +67,19 @@
             el.appendChild(animeEl);
           });
         },
+        update(el, binding) {
+          el.querySelectorAll('a-animation').forEach(animation => {
+            el.removeChild(animation);
+          });
+          let _value = binding.value;
+          if (!Array.isArray(_value)) {
+            _value = [_value];
+          }
+          _value.map(attributes => {
+            const animeEl = createAframeAnimation(attributes);
+            el.appendChild(animeEl);
+          });
+        },
         unbind(el) {
           el.querySelectorAll('a-animation').forEach(animation => {
             el.removeChild(animation);
@@ -83,30 +96,33 @@
           {begin: "mouseenter", attribute: "scale", to: {x: 1.2, y: 1.2, z: 1.0}},
           {begin: "mouseleave", attribute: "scale", to: {x: 1.0, y: 1.0, z: 1.0}}
         ],
+        thumbs: [
+          "city-thumb",
+          "cubes-thumb",
+          "sechelt-thumb"
+        ],
         fade: {
           begin: "image-fade",
           attribute: "material.color",
           direction: "alternate",
           from: "#FFF", to: "#000", dur: 300
         },
-        thumbs: [
-          "city-thumb",
-          "cubes-thumb",
-          "sechelt-thumb"
-        ],
         sky: "city"
       }
     },
     methods: {
       change(id) {
+        this.hover = [
+          {begin: "mouseenter", attribute: "material.color", from: "#FFF", to: "#000"},
+          {begin: "mouseleave", attribute: "material.color", from: "#000", to: "#FFF"}
+        ];
+
         const imageId = id.replace(/-thumb/, "");
         const skyEl = this.$refs.sky;
-        console.log(skyEl);
         skyEl.emit('image-fade');
         setTimeout(()=>{
           this.sky = imageId;
           skyEl.emit('image-fade');
-          console.log("hoge");
         }, this.fade.dur + 100);
       }
     }
